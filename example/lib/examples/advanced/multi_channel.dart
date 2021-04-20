@@ -8,7 +8,7 @@ import 'package:agora_rtc_engine_example/config/agora.config.dart' as config;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 const _channelId0 = 'channel0';
 const _channelId1 = 'channel1';
@@ -51,7 +51,9 @@ class _State extends State<MultiChannel> {
 
   _joinChannel0() async {
     if (defaultTargetPlatform == TargetPlatform.android) {
-      await [Permission.microphone, Permission.camera].request();
+      await SimplePermissions.requestPermission(Permission.RecordAudio);
+      await SimplePermissions.requestPermission(Permission.Camera);
+      //await [Permission.microphone, Permission.camera].request();
     }
 
     widget._channel0 = await RtcChannel.create(_channelId0);
@@ -64,7 +66,9 @@ class _State extends State<MultiChannel> {
 
   _joinChannel1() async {
     if (defaultTargetPlatform == TargetPlatform.android) {
-      await [Permission.microphone, Permission.camera].request();
+      await SimplePermissions.requestPermission(Permission.RecordAudio);
+      await SimplePermissions.requestPermission(Permission.Camera);
+      //await [Permission.microphone, Permission.camera].request();
     }
 
     widget._channel1 = await RtcChannel.create(_channelId1);

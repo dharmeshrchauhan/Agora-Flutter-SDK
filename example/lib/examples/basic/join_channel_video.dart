@@ -7,7 +7,7 @@ import 'package:agora_rtc_engine_example/config/agora.config.dart' as config;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 /// MultiChannel Example
 class JoinChannelVideo extends StatefulWidget {
@@ -79,7 +79,9 @@ class _State extends State<JoinChannelVideo> {
 
   _joinChannel() async {
     if (defaultTargetPlatform == TargetPlatform.android) {
-      await [Permission.microphone, Permission.camera].request();
+      await SimplePermissions.requestPermission(Permission.RecordAudio);
+      await SimplePermissions.requestPermission(Permission.Camera);
+      //await [Permission.microphone, Permission.camera].request();
     }
     await widget._engine
         ?.joinChannel(config.token, channelId, null, config.uid);

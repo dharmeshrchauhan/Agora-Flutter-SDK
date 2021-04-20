@@ -7,7 +7,7 @@ import 'package:agora_rtc_engine_example/config/agora.config.dart' as config;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 /// MediaChannelRelay Example
 class MediaChannelRelay extends StatefulWidget {
@@ -37,7 +37,8 @@ class _State extends State<MediaChannelRelay> {
 
   _initEngine() async {
     if (defaultTargetPlatform == TargetPlatform.android) {
-      await Permission.microphone.request();
+      await SimplePermissions.requestPermission(Permission.RecordAudio);
+      //await Permission.microphone.request();
     }
     widget._engine =
         await RtcEngine.createWithConfig(RtcEngineConfig(config.appId));

@@ -6,7 +6,7 @@ import 'package:agora_rtc_engine_example/examples/config/voice_changer.config.da
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 /// VoiceChange Example
 class VoiceChange extends StatefulWidget {
@@ -56,7 +56,8 @@ class _State extends State<VoiceChange> {
 
   _initEngine() async {
     if (defaultTargetPlatform == TargetPlatform.android) {
-      await Permission.microphone.request();
+      await SimplePermissions.requestPermission(Permission.RecordAudio);
+      //await Permission.microphone.request();
     }
     widget._engine =
         await RtcEngine.createWithConfig(RtcEngineConfig(config.appId));

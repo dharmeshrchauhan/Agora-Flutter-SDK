@@ -8,7 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 /// LiveStreaming Example
 class LiveStreaming extends StatefulWidget {
@@ -78,7 +78,8 @@ class _State extends State<LiveStreaming> {
 
   _initEngine() async {
     if (defaultTargetPlatform == TargetPlatform.android) {
-      await Permission.microphone.request();
+      await SimplePermissions.requestPermission(Permission.RecordAudio);
+      //await Permission.microphone.request();
     }
     widget._engine =
         await RtcEngine.createWithConfig(RtcEngineConfig(config.appId));
