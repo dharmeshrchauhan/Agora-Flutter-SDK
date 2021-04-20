@@ -377,6 +377,12 @@ class RtcEngine with RtcEngineInterface {
   }
 
   @override
+  void setExternalVideoSource(bool enable, bool useTexture, bool pushMode) {
+    _invokeMethod('setExternalVideoSource',
+        {'enable': enable, 'useTexture': useTexture, 'pushMode': pushMode});
+  }
+
+  @override
   Future<void> muteAllRemoteVideoStreams(bool muted) {
     return _invokeMethod('muteAllRemoteVideoStreams', {'muted': muted});
   }
@@ -962,8 +968,7 @@ class RtcEngine with RtcEngineInterface {
 
   @override
   Future<int> createDataStreamWithConfig(DataStreamConfig config) {
-    return _invokeMethod(
-        'createDataStream', {'config': config.toJson()});
+    return _invokeMethod('createDataStream', {'config': config.toJson()});
   }
 
   @override
@@ -1577,6 +1582,25 @@ mixin RtcVideoInterface {
   ///   - [RtcEngine.muteRemoteVideoStream]: Whether to subscribe to and play the remote video stream.
   ///   - [RtcEngine.muteAllRemoteVideoStreams]: Whether to subscribe to and play all remote video streams.
   Future<void> disableVideo();
+
+  ////Configures the external video source.
+  ///
+  /// If an external video source is used, call this method before the [enableVideo]([AgoraRtcEngineKit enableVideo]) or [startPreview]([AgoraRtcEngineKit startPreview]) method.
+  ///
+  /// **Parameter** [enable] Sets whether or not to use an external video source:
+  /// - `true`: Use an external video source.
+  /// - `false`: (Default) Do not use an external video source.
+  ///
+  /// **Parameter** [useTexture] Sets whether or not to use texture as an input:
+  /// * YES: Use texture as an input.
+  /// * NO: Do not use texture as an input.
+  ///
+  /// **Parameter** [pushMode] Sets whether or not the external video source needs to call the [pushExternalVideoFrame](pushExternalVideoFrame:) method to send the video frame to the SDK:
+  ///
+  /// - `true`: Use the push mode.
+  /// - `false`: Use the pull mode (not supported yet).
+  /// */
+  void setExternalVideoSource(bool enable, bool useTexture, bool pushMode);
 
   /// Sets the video encoder configuration.
   ///

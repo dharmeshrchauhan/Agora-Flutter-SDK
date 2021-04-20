@@ -125,6 +125,8 @@ protocol RtcEngineVideoInterface {
     func enableVideo(_ callback: Callback)
 
     func disableVideo(_ callback: Callback)
+    
+    func setExternalVideoSource(_ params: NSDictionary)
 
     func setVideoEncoderConfiguration(_ params: NSDictionary, _ callback: Callback)
 
@@ -574,6 +576,10 @@ class RtcEngineManager: NSObject, RtcEngineInterface {
 
     @objc func disableVideo(_ callback: Callback) {
         callback.code(engine?.disableVideo())
+    }
+    
+    @objc func setExternalVideoSource(_ params: NSDictionary) {
+        engine?.setExternalVideoSource(params["enable"] as! Bool, useTexture: params["useTexture"] as! Bool, pushMode: params["pushMode"] as! Bool)
     }
 
     @objc func setVideoEncoderConfiguration(_ params: NSDictionary, _ callback: Callback) {

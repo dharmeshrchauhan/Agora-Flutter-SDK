@@ -87,6 +87,7 @@ class _State extends State<LiveStreaming> {
     this._addListener();
 
     // enable video module and set up video encoding configs
+    widget._engine?.setExternalVideoSource(true, true, true);
     await widget._engine?.enableVideo();
 
     // make this room live broadcasting room
