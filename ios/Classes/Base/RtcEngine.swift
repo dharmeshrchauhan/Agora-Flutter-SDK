@@ -572,6 +572,11 @@ class RtcEngineManager: NSObject, RtcEngineInterface {
 
     @objc func enableVideo(_ callback: Callback) {
         callback.code(engine?.enableVideo())
+        engine?.setExternalVideoSource(true, useTexture: true, pushMode: true);
+        engine?.setVideoEncoderConfiguration(AgoraVideoEncoderConfiguration(size: AgoraVideoDimension1280x720,
+                                                                            frameRate: .fps7,
+                                                                                     bitrate: AgoraVideoBitrateStandard,
+                                                                                     orientationMode: .adaptative))
     }
 
     @objc func disableVideo(_ callback: Callback) {

@@ -77,17 +77,18 @@ class _State extends State<LiveStreaming> {
   }
 
   _initEngine() async {
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      await SimplePermissions.requestPermission(Permission.RecordAudio);
-      //await Permission.microphone.request();
-    }
+    //if (defaultTargetPlatform == TargetPlatform.android) {
+    await SimplePermissions.requestPermission(Permission.RecordAudio);
+    await SimplePermissions.requestPermission(Permission.Camera);
+    //await Permission.microphone.request();
+    //}
     widget._engine =
         await RtcEngine.createWithConfig(RtcEngineConfig(config.appId));
 
     this._addListener();
 
     // enable video module and set up video encoding configs
-    widget._engine?.setExternalVideoSource(true, true, true);
+    //widget._engine?.setExternalVideoSource(true, true, true);
     await widget._engine?.enableVideo();
 
     // make this room live broadcasting room
