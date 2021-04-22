@@ -376,11 +376,11 @@ class RtcEngine with RtcEngineInterface {
     return _invokeMethod('enableVideo');
   }
 
-  @override
-  void setExternalVideoSource(bool enable, bool useTexture, bool pushMode) {
-    _invokeMethod('setExternalVideoSource',
-        {'enable': enable, 'useTexture': useTexture, 'pushMode': pushMode});
-  }
+  // @override
+  // void setExternalVideoSource(bool enable, bool useTexture, bool pushMode) {
+  //   _invokeMethod('setExternalVideoSource',
+  //       {'enable': enable, 'useTexture': useTexture, 'pushMode': pushMode});
+  // }
 
   @override
   Future<void> muteAllRemoteVideoStreams(bool muted) {
@@ -1600,7 +1600,7 @@ mixin RtcVideoInterface {
   /// - `true`: Use the push mode.
   /// - `false`: Use the pull mode (not supported yet).
   /// */
-  void setExternalVideoSource(bool enable, bool useTexture, bool pushMode);
+  //void setExternalVideoSource(bool enable, bool useTexture, bool pushMode);
 
   /// Sets the video encoder configuration.
   ///
