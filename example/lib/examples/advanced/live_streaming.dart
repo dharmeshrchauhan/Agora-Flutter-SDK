@@ -25,6 +25,10 @@ class _State extends State<LiveStreaming> {
   int remoteUid;
   bool isLowAudio = true;
 
+  // RtcLocalView.SurfaceView localSurfaceView = RtcLocalView.SurfaceView(
+  //   channelId: "livestream",
+  // );
+
   @override
   void initState() {
     super.initState();
@@ -153,12 +157,13 @@ class _State extends State<LiveStreaming> {
   }
 
   _onPressToggleRole() {
-    this.setState(() {
-      role = role == ClientRole.Audience
-          ? ClientRole.Broadcaster
-          : ClientRole.Audience;
-      _updateClientRole(role);
-    });
+    //localSurfaceView.setNextARFilter();
+    // this.setState(() {
+    //   role = role == ClientRole.Audience
+    //       ? ClientRole.Broadcaster
+    //       : ClientRole.Audience;
+    //   _updateClientRole(role);
+    // });
   }
 
   _onPressToggleLatencyLevel(value) {
@@ -232,7 +237,7 @@ class _State extends State<LiveStreaming> {
         children: [
           role == ClientRole.Broadcaster
               ? RtcLocalView.SurfaceView(
-                  channelId: renderChannelId,
+                  channelId: "livestream",
                 )
               : remoteUid != null
                   ? RtcRemoteView.SurfaceView(

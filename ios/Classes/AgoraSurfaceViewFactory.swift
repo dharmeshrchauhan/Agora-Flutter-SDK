@@ -37,6 +37,7 @@ class AgoraSurfaceView: NSObject, FlutterPlatformView {
 
     init(_ messager: FlutterBinaryMessenger, _ frame: CGRect, _ viewId: Int64, _ args: Dictionary<String, Any?>?, _ rtcEnginePlugin: SwiftAgoraRtcEnginePlugin, _ rtcChannelPlugin: AgoraRtcChannelPlugin) {
         let isLocalView = ((args?["data"] as! NSDictionary)["uid"]  as! NSNumber).uintValue == 0
+        //let isLocalView = false
         self.rtcEnginePlugin = rtcEnginePlugin
         self.rtcChannelPlugin = rtcChannelPlugin
         if isLocalView  {
@@ -72,6 +73,8 @@ class AgoraSurfaceView: NSObject, FlutterPlatformView {
                 self?.setRenderMode((args["renderMode"] as! NSNumber).uintValue)
             case "setMirrorMode":
                 self?.setMirrorMode((args["mirrorMode"] as! NSNumber).uintValue)
+            case "setNextARFilter":
+                self?.setNextARFilter()
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -106,6 +109,10 @@ class AgoraSurfaceView: NSObject, FlutterPlatformView {
         if let `engine` = engine {
             _view?.setMirrorMode(engine, mirrorMode)
         }
+    }
+    
+    func setNextARFilter() {
+        _localView.setNextARFilter();
     }
 
     private var engine: AgoraRtcEngineKit? {

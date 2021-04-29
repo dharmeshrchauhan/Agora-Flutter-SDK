@@ -19,17 +19,8 @@ class ARCameraView: UIView {
     
     public func setupDeepAR() {
         self.deepAr = DeepAR()
-        self.deepAr.setLicenseKey("8b7dffa9177cca4a8a908338cae6c885ca75cb02a38dd087618fe9001e042a66fa2b653c30affdf1")
+        self.deepAr.setLicenseKey("4c92426f96aba754a1c22f8ee4624dd127c46772e75af4621284a4fad9592d5db1414470d5522a20")
         self.deepAr.delegate = deepARDelegate
-    }
-    
-    @objc
-    private func toggleBeautyFilter(_ sender: UIButton) {
-        self.deepAr.switchEffect(withSlot: "masks", path:
-                                    Bundle(identifier: "org.cocoapods.agora-rtc-engine")?.path(forResource: "beauty_without_eyelashes", ofType: nil))
-        self.btn.setTitle("Remove Beauty Filter", for: .normal)
-        self.btn.isHidden = true
-        //self.btn.setTitle("Set Beauty Filter", for: .normal)
     }
     
     public func setupARCamera() {
@@ -46,10 +37,13 @@ class ARCameraView: UIView {
         self.cameraController.startCamera()
 
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
-            self.deepAr.switchEffect(withSlot: "masks", path:
-                                        Bundle(identifier: "org.cocoapods.agora-rtc-engine")?.path(forResource: "beauty_without_eyelashes", ofType: nil))
             self.deepAr.startCapture(withOutputWidth: 720, outputHeight: 1280, subframe: CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0))
         }
+    }
+    
+    public func setNextARFilter() {
+        self.deepAr.switchEffect(withSlot: "masks", path:
+                                                Bundle(identifier: "org.cocoapods.agora-rtc-engine")?.path(forResource: "flower_crown", ofType: nil))
     }
     
     override var bounds: CGRect {
