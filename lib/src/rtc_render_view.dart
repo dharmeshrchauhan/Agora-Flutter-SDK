@@ -48,6 +48,8 @@ class RtcSurfaceView extends StatefulWidget {
   /// `id` is the platform view's unique identifier.
   final PlatformViewCreatedCallback? onPlatformViewCreated;
 
+  late _RtcSurfaceViewState _state;
+
   /// Which gestures should be consumed by the web view.
   ///
   /// It is possible for other gesture recognizers to be competing with the web view on pointer
@@ -74,7 +76,13 @@ class RtcSurfaceView extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return _RtcSurfaceViewState();
+    _state = _RtcSurfaceViewState();
+    return _state;
+  }
+
+  ///switch to next AR filter
+  void setNextARFilter() {
+    _state.setNextARFilter();
   }
 }
 
@@ -186,6 +194,10 @@ class _RtcSurfaceViewState extends State<RtcSurfaceView> {
     _channels[_id]?.invokeMethod('setZOrderOnTop', {
       'onTop': widget.zOrderOnTop,
     });
+  }
+
+  void setNextARFilter() {
+    _channels[_id]?.invokeMethod('setNextARFilter', {});
   }
 
   void setZOrderMediaOverlay() {
