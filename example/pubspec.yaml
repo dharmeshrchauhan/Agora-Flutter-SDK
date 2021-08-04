@@ -1,5 +1,6 @@
 name: agora_rtc_engine_example
 description: Demonstrates how to use the agora_rtc_engine plugin.
+version: 1.0.0
 publish_to: 'none'
 
 environment:
