@@ -1,14 +1,14 @@
 /// Get your own App ID at https://dashboard.agora.io/
-const appId = YOUR_APP_ID;
+const appId = "0fd092bc017649cd95b0ba16dd38835a";
 
 /// Please refer to https://docs.agora.io/en/Agora%20Platform/token
-const token = YOUR_TOEKN;
+const token = "";
 
 /// Your channel ID
-const channelId = YOUR_CHANNEL_ID;
+const channelId = "channel1";
 
 /// Your int user ID
-const uid = YOUR_UID;
+const uid = 1;
 
 /// Your string user ID
-const stringUid = YOUR_STRING_UID;
+const stringUid = "1";
