@@ -36,7 +36,8 @@ class AgoraSurfaceView: NSObject, FlutterPlatformView {
     private let channel: FlutterMethodChannel
 
     init(_ messager: FlutterBinaryMessenger, _ frame: CGRect, _ viewId: Int64, _ args: Dictionary<String, Any?>?, _ rtcEnginePlugin: SwiftAgoraRtcEnginePlugin, _ rtcChannelPlugin: AgoraRtcChannelPlugin) {
-        let isLocalView = ((args?["data"] as! NSDictionary)["uid"]  as! NSNumber).uintValue == 0
+        let deepArLicenseKey = args?["deepArLicenseKey"] as! String
+        let isLocalView = deepArLicenseKey.count > 0
         //let isLocalView = false
         self.rtcEnginePlugin = rtcEnginePlugin
         self.rtcChannelPlugin = rtcChannelPlugin
@@ -49,8 +50,13 @@ class AgoraSurfaceView: NSObject, FlutterPlatformView {
         self.channel = FlutterMethodChannel(name: "agora_rtc_engine/surface_view_\(viewId)", binaryMessenger: messager)
         super.init()
         if isLocalView  {
+            engine?.setExternalVideoSource(true, useTexture: true, pushMode: true);
+            engine?.setVideoEncoderConfiguration(AgoraVideoEncoderConfiguration(size: AgoraVideoDimension1280x720,
+                                                                                frameRate: .fps15,
+                                                                                         bitrate: AgoraVideoBitrateStandard,
+                                                                                         orientationMode: .adaptative))
             self._localView.deepARDelegate = self
-            self._localView.setupDeepAR()
+            self._localView.setupDeepAR(deepArLicenseKey: deepArLicenseKey)
             self._localView.setupARCamera()
         }
         else {
@@ -75,6 +81,8 @@ class AgoraSurfaceView: NSObject, FlutterPlatformView {
                 self?.setMirrorMode((args["mirrorMode"] as! NSNumber).uintValue)
             case "setNextARFilter":
                 self?.setNextARFilter()
+            case "endDeepAR":
+                self?.endDeepAR()
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -113,6 +121,11 @@ class AgoraSurfaceView: NSObject, FlutterPlatformView {
     
     func setNextARFilter() {
         _localView.setNextARFilter();
+    }
+    
+    func endDeepAR() {
+        _localView.endDeepAR();
+        //engine?.setExternalVideoSource(false, useTexture: false, pushMode: false)
     }
 
     private var engine: AgoraRtcEngineKit? {

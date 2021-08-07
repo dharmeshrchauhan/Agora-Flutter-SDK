@@ -11,6 +11,7 @@ final Map<int, MethodChannel> _channels = {};
 
 /// Use SurfaceView on Android.
 /// Use UIView on iOS.
+// ignore: must_be_immutable
 class RtcSurfaceView extends StatefulWidget {
   /// User ID.
   final int uid;
@@ -48,6 +49,9 @@ class RtcSurfaceView extends StatefulWidget {
   /// `id` is the platform view's unique identifier.
   final PlatformViewCreatedCallback? onPlatformViewCreated;
 
+  ///DeepAR Android License Key
+  final String? deepArLicenseKey;
+
   late _RtcSurfaceViewState _state;
 
   /// Which gestures should be consumed by the web view.
@@ -72,6 +76,7 @@ class RtcSurfaceView extends StatefulWidget {
     this.zOrderMediaOverlay = false,
     this.onPlatformViewCreated,
     this.gestureRecognizers,
+    this.deepArLicenseKey,
   }) : super(key: key);
 
   @override
@@ -83,6 +88,10 @@ class RtcSurfaceView extends StatefulWidget {
   ///switch to next AR filter
   void setNextARFilter() {
     _state.setNextARFilter();
+  }
+
+  void endDeepAR() {
+    _state.endDeepAR();
   }
 }
 
@@ -106,6 +115,7 @@ class _RtcSurfaceViewState extends State<RtcSurfaceView> {
             'mirrorMode': _mirrorMode,
             'zOrderOnTop': widget.zOrderOnTop,
             'zOrderMediaOverlay': widget.zOrderMediaOverlay,
+            'deepArLicenseKey': widget.deepArLicenseKey,
           },
           creationParamsCodec: const StandardMessageCodec(),
           gestureRecognizers: widget.gestureRecognizers,
@@ -119,9 +129,14 @@ class _RtcSurfaceViewState extends State<RtcSurfaceView> {
           onPlatformViewCreated: onPlatformViewCreated,
           hitTestBehavior: PlatformViewHitTestBehavior.transparent,
           creationParams: {
-            'data': {'uid': widget.uid, 'channelId': widget.channelId},
+            'data': {
+              'uid': widget.uid,
+              'channelId': widget.channelId,
+              'deepArLicenseKey': widget.deepArLicenseKey
+            },
             'renderMode': _renderMode,
             'mirrorMode': _mirrorMode,
+            'deepArLicenseKey': widget.deepArLicenseKey ?? '',
           },
           creationParamsCodec: const StandardMessageCodec(),
           gestureRecognizers: widget.gestureRecognizers,
@@ -198,6 +213,10 @@ class _RtcSurfaceViewState extends State<RtcSurfaceView> {
 
   void setNextARFilter() {
     _channels[_id]?.invokeMethod('setNextARFilter', {});
+  }
+
+  void endDeepAR() {
+    _channels[_id]?.invokeMethod('endDeepAR', {});
   }
 
   void setZOrderMediaOverlay() {

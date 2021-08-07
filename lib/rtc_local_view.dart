@@ -18,6 +18,7 @@ class SurfaceView extends RtcSurfaceView {
     zOrderMediaOverlay = false,
     PlatformViewCreatedCallback? onPlatformViewCreated,
     Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers,
+    String? deepArLicenseKey,
   }) : super(
           key: key,
           uid: 0,
@@ -28,6 +29,7 @@ class SurfaceView extends RtcSurfaceView {
           zOrderMediaOverlay: zOrderMediaOverlay,
           onPlatformViewCreated: onPlatformViewCreated,
           gestureRecognizers: gestureRecognizers,
+          deepArLicenseKey: deepArLicenseKey,
         );
 }
 
