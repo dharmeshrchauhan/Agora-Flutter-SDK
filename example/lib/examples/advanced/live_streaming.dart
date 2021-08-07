@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:io' show Platform;
 
 /// LiveStreaming Example
 class LiveStreaming extends StatefulWidget {
@@ -22,6 +23,12 @@ class _State extends State<LiveStreaming> {
   ClientRole role = ClientRole.Audience;
   int? remoteUid;
   bool isLowAudio = true;
+  RtcLocalView.SurfaceView localSurfaceView = RtcLocalView.SurfaceView(
+    channelId: config.channelId,
+    deepArLicenseKey: Platform.isAndroid
+        ? "24c2bce175ea21aeb640c46a4ee2e385f4f1c54912e759e5dd723470bc91d3180c9c8cad3dcf8de8"
+        : "ebde8bcb2a9d98b2adc132ca20517a88880404fc53fbdc213c1fd182dd32e21102bfef19efddea5e",
+  );
 
   @override
   void initState() {
@@ -146,10 +153,11 @@ class _State extends State<LiveStreaming> {
 
   _onPressToggleRole() {
     this.setState(() {
-      role = role == ClientRole.Audience
-          ? ClientRole.Broadcaster
-          : ClientRole.Audience;
-      _updateClientRole(role);
+      //localSurfaceView.setNextARFilter();
+      // role = role == ClientRole.Audience
+      //     ? ClientRole.Broadcaster
+      //     : ClientRole.Audience;
+      // _updateClientRole(role);
     });
   }
 
@@ -224,7 +232,9 @@ class _State extends State<LiveStreaming> {
       child: Stack(
         children: [
           role == ClientRole.Broadcaster
-              ? RtcLocalView.SurfaceView()
+              ? RtcLocalView.SurfaceView(
+                  channelId: config.channelId,
+                )
               : remoteUid != null
                   ? RtcRemoteView.SurfaceView(
                       uid: remoteUid!,

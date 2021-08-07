@@ -5,10 +5,10 @@ const appId = "0fd092bc017649cd95b0ba16dd38835a";
 const token = "";
 
 /// Your channel ID
-const channelId = "channel1";
+const channelId = "channel";
 
 /// Your int user ID
-const uid = 1;
+const uid = 123;
 
 /// Your string user ID
-const stringUid = "1";
+const stringUid = "123";
