@@ -27,7 +27,7 @@ Pod::Spec.new do |s|
   s.resources = ['Effects/*']
   s.resource_bundle = { 'Effects' => 'Effects/*.' }
 
-  s.preserve_paths = 'DeepAR.xcframework'
+  s.preserve_paths = 'DeepAR.framework'
   s.xcconfig = { 'OTHER_LDFLAGS' => '-framework DeepAR' }
-  s.vendored_frameworks = 'DeepAR.xcframework'
+  s.vendored_frameworks = 'DeepAR.framework'
 end
