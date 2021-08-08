@@ -20,23 +20,6 @@ enum Masks: String, CaseIterable {
     case none
     case beauty_without_deform
     case beauty_without_eyelashes
-//    case beard
-//    case ball_face
-//    case background_segmentation
-//    case alien
-//    case aviators
-//    case fairy_lights
-//    case flower_crown
-//    case frankenstein
-//    case hair_segmentation
-//    case lion
-//    case manly_face
-//    case plastic_ocean
-//    case pumpkin
-//    case scuba
-//    case tape_face
-//    case tiny_sunglasses
-//    case topology
 }
 
 class ARCameraView: UIView {
@@ -50,7 +33,7 @@ class ARCameraView: UIView {
         currentIndex = (currentIndex + 1) % maskPaths.count
         return maskPaths[currentIndex]
     }
-        
+    
     public var deepARDelegate: DeepARDelegate!
     private var cameraController: CameraController!
     private var btn: UIButton!
@@ -63,21 +46,19 @@ class ARCameraView: UIView {
     
     public func setupARCamera() {
         //let rect = CGRect(x: 0, y: 0, width: 720, height: 1280)
-        let arviewFrame = self.bounds.width > 0 ? self.bounds : CGRect(x: 0, y: 0, width: 300, height: 300)
-        self.arView = (self.deepAr.switchToRenderingToView(withFrame: arviewFrame) as! ARView)
+        let arviewFrame = self.bounds.width > 0 ? self.bounds : CGRect(x: 0, y: 0, width: 1, height: 1)
+        self.arView = (self.deepAr.createARView(withFrame: arviewFrame) as! ARView)
+        self.arView.contentMode = ContentMode.scaleAspectFill
         self.addSubview(self.arView)
-        
-//        self.btn = UIButton(frame: CGRect(x: 20, y: 30, width: 150, height: 30));
-//        self.btn.setTitle("Set Beauty Filter", for: .normal)
-//        self.btn.addTarget(self, action: #selector(toggleBeautyFilter(_:)), for: .touchUpInside)
-//        self.addSubview(self.btn)
+        NSLayoutConstraint.activate([
+                                        self.arView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 0),
+                                        self.arView.rightAnchor.constraint(equalTo: self.rightAnchor, constant: 0),
+                                        self.arView.topAnchor.constraint(equalTo: self.topAnchor, constant: 0),
+                                        self.arView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: 0)]);
         self.cameraController = CameraController()
         self.cameraController.deepAR = self.deepAr
-        currentIndex = 0;
-        self.deepAr.switchEffect(withSlot: "masks", path: maskPaths[currentIndex])
         self.cameraController.startCamera()
         
-
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
             self.deepAr.startCapture(withOutputWidth: 720, outputHeight: 1280, subframe: CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0))
         }
@@ -89,6 +70,16 @@ class ARCameraView: UIView {
     
     public func endDeepAR() {
         self.arView?.stopFrameOutput()
+        self.deepAr.shutdown()
+    }
+    
+    public func switchCamera() {
+        if (self.cameraController.position == .front){
+        self.cameraController.position = .back;
+        }
+        else {
+            self.cameraController.position = .front;
+        }
     }
     
     override var bounds: CGRect {

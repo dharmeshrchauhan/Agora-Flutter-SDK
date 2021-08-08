@@ -83,6 +83,8 @@ class AgoraSurfaceView: NSObject, FlutterPlatformView {
                 self?.setNextARFilter()
             case "endDeepAR":
                 self?.endDeepAR()
+            case "switchCamera":
+                self?.switchCamera()
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -126,6 +128,10 @@ class AgoraSurfaceView: NSObject, FlutterPlatformView {
     func endDeepAR() {
         _localView.endDeepAR();
         //engine?.setExternalVideoSource(false, useTexture: false, pushMode: false)
+    }
+    
+    public func switchCamera() {
+        _localView.switchCamera();
     }
 
     private var engine: AgoraRtcEngineKit? {

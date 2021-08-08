@@ -93,6 +93,10 @@ class RtcSurfaceView extends StatefulWidget {
   void endDeepAR() {
     _state.endDeepAR();
   }
+
+  void switchCamera() {
+    _state.switchCamera();
+  }
 }
 
 class _RtcSurfaceViewState extends State<RtcSurfaceView> {
@@ -217,6 +221,10 @@ class _RtcSurfaceViewState extends State<RtcSurfaceView> {
 
   void endDeepAR() {
     _channels[_id]?.invokeMethod('endDeepAR', {});
+  }
+
+  void switchCamera() {
+    _channels[_id]?.invokeMethod('switchCamera', {});
   }
 
   void setZOrderMediaOverlay() {
