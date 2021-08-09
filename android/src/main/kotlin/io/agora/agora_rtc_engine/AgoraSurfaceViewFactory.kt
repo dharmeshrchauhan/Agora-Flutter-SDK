@@ -4,7 +4,8 @@ import android.content.Context
 import android.view.View
 import io.agora.rtc.RtcChannel
 import io.agora.rtc.RtcEngine
-import io.agora.rtc.base.RtcSurfaceView
+import io.agora.rtc.base.DeepArSurfaceView
+import io.agora.rtc.video.VideoEncoderConfiguration
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -37,7 +38,7 @@ class AgoraSurfaceView(
   private val rtcEnginePlugin: AgoraRtcEnginePlugin,
   private val rtcChannelPlugin: AgoraRtcChannelPlugin
 ) : PlatformView, MethodChannel.MethodCallHandler {
-  private val view = RtcSurfaceView(context)
+  private val view = DeepArSurfaceView(context)
   private val channel = MethodChannel(messenger, "agora_rtc_engine/surface_view_$viewId")
 
   init {
@@ -46,9 +47,25 @@ class AgoraSurfaceView(
       (map["renderMode"] as? Number)?.let { setRenderMode(it.toInt()) }
       (map["mirrorMode"] as? Number)?.let { setMirrorMode(it.toInt()) }
       (map["zOrderOnTop"] as? Boolean)?.let { setZOrderOnTop(it) }
+      (map["deepArLicenseKey"] as? String)?.let { setDeepArLicenseKey(it) }
       (map["zOrderMediaOverlay"] as? Boolean)?.let { setZOrderMediaOverlay(it) }
     }
     channel.setMethodCallHandler(this)
+
+    rtcEnginePlugin.engine()!!.setExternalVideoSource(true, true, true)
+
+    // Please go to this page for detailed explanation
+    // https://docs.agora.io/en/Video/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_rtc_engine.html#af5f4de754e2c1f493096641c5c5c1d8f
+    rtcEnginePlugin.engine()!!.setVideoEncoderConfiguration(VideoEncoderConfiguration( // Agora seems to work best with "Square" resolutions (Aspect Ratio 1:1)
+      // At least when used in combination with DeepAR
+      VideoEncoderConfiguration.VD_480x480,
+      VideoEncoderConfiguration.FRAME_RATE.FRAME_RATE_FPS_15,
+      VideoEncoderConfiguration.STANDARD_BITRATE,
+      VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_FIXED_PORTRAIT))
+
+    view.initializeDeepAR()
+    view.setupCamera()
+
   }
 
   override fun getView(): View {
@@ -96,6 +113,9 @@ class AgoraSurfaceView(
 
   private fun setZOrderOnTop(onTop: Boolean) {
     view.setZOrderOnTop(onTop)
+  }
+  private fun setDeepArLicenseKey(key: String) {
+    view.setDeepArLicenseKey(key)
   }
 
   private fun setZOrderMediaOverlay(isMediaOverlay: Boolean) {
