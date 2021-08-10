@@ -1,12 +1,17 @@
 package io.agora.rtc.base
 
 import ai.deepar.ar.*
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
+import android.hardware.Camera
 import android.media.Image
 import android.util.Size
+import android.view.MotionEvent
 import android.view.SurfaceView
+import android.view.View
 import android.widget.FrameLayout
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -20,7 +25,9 @@ import java.lang.ref.WeakReference
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.*
-import java.util.concurrent.ExecutionException
+import android.util.Log
+import ai.deepar.ar.CameraResolutionPreset
+import ai.deepar.ar.DeepAR
 
 
 class DeepArSurfaceView(
@@ -40,6 +47,10 @@ class DeepArSurfaceView(
   private var currentBuffer = 0
   private val defaultLensFacing = CameraSelector.LENS_FACING_FRONT
   private val lensFacing: Int = defaultLensFacing
+  private var cameraGrabber: CameraGrabber? = null
+
+  private val defaultCameraDevice = Camera.CameraInfo.CAMERA_FACING_FRONT
+  private val cameraDevice: Int = defaultCameraDevice
 
   init {
     try {
@@ -181,19 +192,67 @@ class DeepArSurfaceView(
   }
 
   public fun setupCamera() {
-    cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-    cameraProviderFuture!!.addListener(object : Runnable {
-      override fun run() {
-        try {
-          val cameraProvider: ProcessCameraProvider = cameraProviderFuture!!.get()
-          bindImageAnalysis(cameraProvider)
-        } catch (e: ExecutionException) {
-          e.printStackTrace()
-        } catch (e: InterruptedException) {
-          e.printStackTrace()
-        }
+    cameraGrabber = CameraGrabber(cameraDevice)
+    //screenOrientation = 0
+//    when (1) {
+//      ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE -> cameraGrabber!!.screenOrientation =
+//        90
+//      ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE -> cameraGrabber!!.screenOrientation =
+//        270
+//      else -> cameraGrabber!!.screenOrientation = 0
+//    }
+
+   // cameraGrabber!!.screenOrientation = 1
+
+    // Available 1080p, 720p and 480p resolutions
+   // cameraGrabber!!.setResolutionPreset(CameraResolutionPreset.P640x480)
+    Log.d("myTag", "This is my message");
+    //final Activity context = this;
+    cameraGrabber!!.initCamera(object : CameraGrabberListener {
+      override fun onCameraInitialized() {
+        Log.d("myTag", "This is my aawewewewewe");
+        cameraGrabber!!.setFrameReceiver(deepAR!!)
+       // cameraGrabber!!.releaseCamera()
+        cameraGrabber!!.startPreview()
       }
-    }, ContextCompat.getMainExecutor(context))
+
+      override fun onCameraError(errorMsg: String) {
+        Log.d("myTag", errorMsg);
+//        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+//        builder.setTitle("Camera error")
+//        builder.setMessage(errorMsg)
+//        builder.setCancelable(true)
+//        builder.setPositiveButton("Ok", object : DialogInterface.OnClickListener {
+//          override fun onClick(dialogInterface: DialogInterface, i: Int) {
+//            dialogInterface.cancel()
+//          }
+//        })
+//        val dialog: AlertDialog = builder.create()
+//        dialog.show()
+      }
+    })
+    surface.setOnTouchListener(object : OnTouchListener {
+      override fun onTouch(v: View, event: MotionEvent): Boolean {
+        // Get the pointer ID
+        val params: Camera.Parameters = cameraGrabber!!.getCamera().getParameters()
+        val action: Int = event.getAction()
+        if (event.getPointerCount() > 1) {
+          // handle multi-touch events
+//                    if (action == MotionEvent.ACTION_POINTER_DOWN) {
+//                        mDist = getFingerSpacing(event);
+//                    } else if (action == MotionEvent.ACTION_MOVE && params.isZoomSupported()) {
+//                        cameraGrabber.getCamera().cancelAutoFocus();
+//                        handleZoom(event, params);
+//                    }
+        } else {
+          // handle single touch events
+          if (action == MotionEvent.ACTION_UP) {
+           // handleFocus(event)
+          }
+        }
+        return true
+      }
+    })
   }
 
   private fun bindImageAnalysis(cameraProvider: ProcessCameraProvider) {
@@ -236,15 +295,15 @@ class DeepArSurfaceView(
         if (deepAR != null) {
          // ByteBuffer buffer, int width, int height, int orientation, boolean mirror
          // ByteBuffer buffer, int width, int height, int orientation, boolean mirror, long timestamp
-          deepAR!!.receiveFrame(
-            buffers[currentBuffer],
-            image.width,
-            image.height,
-            image.imageInfo.rotationDegrees,
-            lensFacing == CameraSelector.LENS_FACING_FRONT,
-            DeepARImageFormat.YUV_420_888,
-            image.planes[1].pixelStride
-          )
+//          deepAR!!.receiveFrame(
+//            buffers[currentBuffer],
+//            image.width,
+//            image.height,
+//            image.imageInfo.rotationDegrees,
+//            lensFacing == CameraSelector.LENS_FACING_FRONT,
+//            DeepARImageFormat.YUV_420_888,
+//            image.planes[1].pixelStride
+//          )
         }
         currentBuffer = (currentBuffer + 1) % NUMBER_OF_BUFFERS
         image.close()
