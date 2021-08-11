@@ -1,10 +1,15 @@
 package io.agora.agora_rtc_engine
 
+import ai.deepar.ar.ARErrorType
+import ai.deepar.ar.AREventListener
 import android.content.Context
+import android.graphics.Bitmap
+import android.media.Image
 import android.view.View
 import io.agora.rtc.RtcChannel
 import io.agora.rtc.RtcEngine
-import io.agora.rtc.base.DeepArSurfaceView
+//import io.agora.rtc.base.DeepArSurfaceView
+import io.agora.rtc.base.DeepArCameraView
 import io.agora.rtc.video.VideoEncoderConfiguration
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
@@ -37,8 +42,8 @@ class AgoraSurfaceView(
   args: Map<*, *>?,
   private val rtcEnginePlugin: AgoraRtcEnginePlugin,
   private val rtcChannelPlugin: AgoraRtcChannelPlugin
-) : PlatformView, MethodChannel.MethodCallHandler {
-  private val view = DeepArSurfaceView(context)
+) : PlatformView, MethodChannel.MethodCallHandler, AREventListener {
+  private val view = DeepArCameraView(context, this)
   private val channel = MethodChannel(messenger, "agora_rtc_engine/surface_view_$viewId")
 
   init {
@@ -52,19 +57,20 @@ class AgoraSurfaceView(
     }
     channel.setMethodCallHandler(this)
 
-    rtcEnginePlugin.engine()!!.setExternalVideoSource(true, true, true)
+//    rtcEnginePlugin.engine()!!.setExternalVideoSource(true, true, true)
+//
+//    // Please go to this page for detailed explanation
+//    // https://docs.agora.io/en/Video/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_rtc_engine.html#af5f4de754e2c1f493096641c5c5c1d8f
+//    rtcEnginePlugin.engine()!!.setVideoEncoderConfiguration(VideoEncoderConfiguration( // Agora seems to work best with "Square" resolutions (Aspect Ratio 1:1)
+//      // At least when used in combination with DeepAR
+//      VideoEncoderConfiguration.VD_480x480,
+//      VideoEncoderConfiguration.FRAME_RATE.FRAME_RATE_FPS_15,
+//      VideoEncoderConfiguration.STANDARD_BITRATE,
+//      VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_FIXED_PORTRAIT))
+//
+//    view.initializeDeepAR()
 
-    // Please go to this page for detailed explanation
-    // https://docs.agora.io/en/Video/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_rtc_engine.html#af5f4de754e2c1f493096641c5c5c1d8f
-    rtcEnginePlugin.engine()!!.setVideoEncoderConfiguration(VideoEncoderConfiguration( // Agora seems to work best with "Square" resolutions (Aspect Ratio 1:1)
-      // At least when used in combination with DeepAR
-      VideoEncoderConfiguration.VD_480x480,
-      VideoEncoderConfiguration.FRAME_RATE.FRAME_RATE_FPS_15,
-      VideoEncoderConfiguration.STANDARD_BITRATE,
-      VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_FIXED_PORTRAIT))
-
-    view.initializeDeepAR()
-    view.setupCamera()
+    view.setup(rtcEnginePlugin.engine()!!)
 
   }
 
@@ -99,27 +105,27 @@ class AgoraSurfaceView(
   }
 
   private fun setData(data: Map<*, *>) {
-    val channel = (data["channelId"] as? String)?.let { getChannel(it) }
-    getEngine()?.let { view.setData(it, channel, (data["uid"] as Number).toInt()) }
+//    val channel = (data["channelId"] as? String)?.let { getChannel(it) }
+//    getEngine()?.let { view.setData(it, channel, (data["uid"] as Number).toInt()) }
   }
 
   private fun setRenderMode(renderMode: Int) {
-    getEngine()?.let { view.setRenderMode(it, renderMode) }
+//    getEngine()?.let { view.setRenderMode(it, renderMode) }
   }
 
   private fun setMirrorMode(mirrorMode: Int) {
-    getEngine()?.let { view.setMirrorMode(it, mirrorMode) }
+  //  getEngine()?.let { view.setMirrorMode(it, mirrorMode) }
   }
 
   private fun setZOrderOnTop(onTop: Boolean) {
-    view.setZOrderOnTop(onTop)
+//    view.setZOrderOnTop(onTop)
   }
   private fun setDeepArLicenseKey(key: String) {
-    view.setDeepArLicenseKey(key)
+//    view.setDeepArLicenseKey(key)
   }
 
   private fun setZOrderMediaOverlay(isMediaOverlay: Boolean) {
-    view.setZOrderMediaOverlay(isMediaOverlay)
+//    view.setZOrderMediaOverlay(isMediaOverlay)
   }
 
   private fun getEngine(): RtcEngine? {
@@ -128,5 +134,53 @@ class AgoraSurfaceView(
 
   private fun getChannel(channelId: String): RtcChannel? {
     return rtcChannelPlugin.channel(channelId)
+  }
+
+  override fun screenshotTaken(p0: Bitmap?) {
+    //TODO("Not yet implemented")
+  }
+
+  override fun videoRecordingStarted() {
+    //TODO("Not yet implemented")
+  }
+
+  override fun videoRecordingFinished() {
+    //TODO("Not yet implemented")
+  }
+
+  override fun videoRecordingFailed() {
+    //TODO("Not yet implemented")
+  }
+
+  override fun videoRecordingPrepared() {
+    //TODO("Not yet implemented")
+  }
+
+  override fun shutdownFinished() {
+    //TODO("Not yet implemented")
+  }
+
+  override fun initialized() {
+    //TODO("Not yet implemented")
+  }
+
+  override fun faceVisibilityChanged(p0: Boolean) {
+    //TODO("Not yet implemented")
+  }
+
+  override fun imageVisibilityChanged(p0: String?, p1: Boolean) {
+    TODO("Not yet implemented")
+  }
+
+  override fun frameAvailable(p0: Image?) {
+    //TODO("Not yet implemented")
+  }
+
+  override fun error(p0: ARErrorType?, p1: String?) {
+    //TODO("Not yet implemented")
+  }
+
+  override fun effectSwitched(p0: String?) {
+    //TODO("Not yet implemented")
   }
 }

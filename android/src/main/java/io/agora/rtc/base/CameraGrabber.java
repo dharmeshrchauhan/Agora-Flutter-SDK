@@ -203,7 +203,7 @@ public class CameraGrabber
                                 buffers[currentBuffer].position(0);
                                 if (frameReceiver != null) {
                                   Log.d("checkCamra", "555555");
-                                    frameReceiver.receiveFrame(buffers[currentBuffer], width,height, cameraOrientation, cameraDevice == Camera.CameraInfo.CAMERA_FACING_FRONT);
+                                    //frameReceiver.receiveFrame(buffers[currentBuffer], width,height, cameraOrientation, cameraDevice == Camera.CameraInfo.CAMERA_FACING_FRONT);
                                 }
                                 currentBuffer = ( currentBuffer + 1 ) % NUMBER_OF_BUFFERS;
                             }
