@@ -17,7 +17,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.LifecycleRegistry;
 
 import android.graphics.Canvas;
 
@@ -34,9 +33,8 @@ import io.agora.agora_rtc_engine.AgoraSurfaceView;
 import io.agora.rtc.RtcEngine;
 import io.flutter.plugin.platform.PlatformView;
 
-public class DeepArCameraView extends GLSurfaceView implements LifecycleOwner{
+public class DeepArCameraView extends FrameLayout{
 
-  private LifecycleRegistry lifecycleRegistry;
   private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
   private Context context;
   private AgoraSurfaceView parentView;
@@ -45,31 +43,30 @@ public class DeepArCameraView extends GLSurfaceView implements LifecycleOwner{
   private static final int NUMBER_OF_BUFFERS=2;
   private int defaultLensFacing = CameraSelector.LENS_FACING_FRONT;
   private int lensFacing = defaultLensFacing;
-  //private GLSurfaceView surfaceView;
+  private GLSurfaceView surfaceView;
   private DeepARRenderer renderer;
   private DeepAR deepAR;
+  Activity activity;
 
-  public DeepArCameraView(@NonNull Context context, AgoraSurfaceView parentView, RtcEngine engine) {
+  public DeepArCameraView(Activity activity, @NonNull Context context, AgoraSurfaceView parentView, RtcEngine engine) {
     super(context);
+    this.activity = activity;
     this.context = context;
     this.parentView = parentView;
     setWillNotDraw(false);
-    lifecycleRegistry = new LifecycleRegistry(this);
-    lifecycleRegistry.setCurrentState(Lifecycle.State.CREATED);
-    lifecycleRegistry.setCurrentState(Lifecycle.State.STARTED);
 
     deepAR = new DeepAR(context);
     deepAR.setLicenseKey("24c2bce175ea21aeb640c46a4ee2e385f4f1c54912e759e5dd723470bc91d3180c9c8cad3dcf8de8");
     deepAR.initialize(context, parentView);
 
-    //surfaceView = new GLSurfaceView(context);
-    this.setEGLContextClientVersion(2);
-    this.setEGLConfigChooser(8,8,8,8,16,0);
+    surfaceView = new GLSurfaceView(context);
+    surfaceView.setEGLContextClientVersion(2);
+    surfaceView.setEGLConfigChooser(8,8,8,8,16,0);
     renderer = new DeepARRenderer(deepAR, engine);
-    this.setEGLContextFactory(new DeepARRenderer.MyContextFactory(renderer));
-    this.setRenderer(renderer);
-    this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-    //this.addView(surfaceView);
+    surfaceView.setEGLContextFactory(new DeepARRenderer.MyContextFactory(renderer));
+    surfaceView.setRenderer(renderer);
+    surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+    this.addView(surfaceView);
   }
 
 //  @Override
@@ -135,8 +132,6 @@ public class DeepArCameraView extends GLSurfaceView implements LifecycleOwner{
       width = cameraPreset.getHeight();
       height = cameraPreset.getWidth();
     }
-    height = 100;
-    width = 100;
     buffers = new ByteBuffer[NUMBER_OF_BUFFERS];
     for (int i = 0; i < NUMBER_OF_BUFFERS; i++) {
       buffers[i] = ByteBuffer.allocateDirect(width * height * 3);
@@ -168,6 +163,7 @@ public class DeepArCameraView extends GLSurfaceView implements LifecycleOwner{
         buffers[currentBuffer].put(byteData);
         buffers[currentBuffer].position(0);
         if(deepAR != null) {
+          //receiveFrame(ByteBuffer buffer, int width, int height, int orientation, boolean mirror)
           deepAR.receiveFrame(buffers[currentBuffer],
             image.getWidth(), image.getHeight(),
             image.getImageInfo().getRotationDegrees(),
@@ -183,34 +179,6 @@ public class DeepArCameraView extends GLSurfaceView implements LifecycleOwner{
 
     CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
     cameraProvider.unbindAll();
-    cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, imageAnalysis);
-  }
-
-
-  private LifecycleOwner getLifecycleOwner(Context context)
-  {
-    if (context == null)
-    {
-      return null;
-    }
-    else if (context instanceof ContextWrapper)
-    {
-      if (context instanceof LifecycleOwner)
-      {
-        return (LifecycleOwner) context;
-      }
-      else
-      {
-        return getLifecycleOwner(((ContextWrapper) context).getBaseContext());
-      }
-    }
-    return null;
-  }
-
-
-  @NonNull
-  @Override
-  public Lifecycle getLifecycle() {
-    return lifecycleRegistry;
+    cameraProvider.bindToLifecycle((LifecycleOwner) activity, cameraSelector, imageAnalysis);
   }
 }

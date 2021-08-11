@@ -139,8 +139,8 @@ public class DeepARRenderer implements GLSurfaceView.Renderer {
 
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, texture);
 
-//        textureWidth = width;
-//        textureHeight = height;
+        textureWidth = width;
+        textureHeight = height;
 
         GLES20.glTexImage2D(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0, GLES20.GL_RGBA, textureWidth, textureHeight, 0,GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null);
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
@@ -159,7 +159,7 @@ public class DeepARRenderer implements GLSurfaceView.Renderer {
         });
 
 
-        deepAR.setRenderSurface(surface, textureWidth, textureHeight);
+        //deepAR.setRenderSurface(surface, textureWidth, textureHeight);
     }
 
     @Override

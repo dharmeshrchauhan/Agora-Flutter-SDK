@@ -1,5 +1,6 @@
 package io.agora.agora_rtc_engine
 
+import android.app.Activity
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -7,6 +8,8 @@ import androidx.annotation.NonNull
 import io.agora.rtc.RtcEngine
 import io.agora.rtc.base.RtcEngineManager
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.*
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
@@ -14,7 +17,8 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 import io.flutter.plugin.platform.PlatformViewRegistry
 
 /** AgoraRtcEnginePlugin */
-class AgoraRtcEnginePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
+class AgoraRtcEnginePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler,
+  ActivityAware {
   private var registrar: Registrar? = null
   private var binding: FlutterPlugin.FlutterPluginBinding? = null
   private lateinit var applicationContext: Context
@@ -31,6 +35,15 @@ class AgoraRtcEnginePlugin : FlutterPlugin, MethodCallHandler, EventChannel.Stre
   private val handler = Handler(Looper.getMainLooper())
   private val rtcChannelPlugin = AgoraRtcChannelPlugin(this)
 
+  private var mPluginRegistrar: Registrar? = null
+  private var pluginBinding: FlutterPlugin.FlutterPluginBinding? = null
+
+  constructor(registrar: Registrar) {
+    this.mPluginRegistrar = registrar
+  }
+
+  constructor() {}
+
   // This static function is optional and equivalent to onAttachedToEngine. It supports the old
   // pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
   // plugin registration via this function while apps migrate to use the new Android APIs
@@ -46,12 +59,15 @@ class AgoraRtcEnginePlugin : FlutterPlugin, MethodCallHandler, EventChannel.Stre
       AgoraRtcEnginePlugin().apply {
         this.registrar = registrar
         rtcChannelPlugin.initPlugin(registrar.messenger())
-        initPlugin(registrar.context(), registrar.messenger(), registrar.platformViewRegistry())
+        if (registrar.activity() != null) {
+          initPlugin(registrar.activity()!!, registrar.context(), registrar.messenger(), registrar.platformViewRegistry());
+        }
       }
     }
   }
 
   private fun initPlugin(
+    activity: Activity,
     context: Context,
     binaryMessenger: BinaryMessenger,
     platformViewRegistry: PlatformViewRegistry
@@ -64,7 +80,7 @@ class AgoraRtcEnginePlugin : FlutterPlugin, MethodCallHandler, EventChannel.Stre
 
     platformViewRegistry.registerViewFactory(
       "AgoraSurfaceView",
-      AgoraSurfaceViewFactory(binaryMessenger, this, rtcChannelPlugin)
+      AgoraSurfaceViewFactory(activity, binaryMessenger, this, rtcChannelPlugin)
     )
     platformViewRegistry.registerViewFactory(
       "AgoraTextureView",
@@ -75,7 +91,7 @@ class AgoraRtcEnginePlugin : FlutterPlugin, MethodCallHandler, EventChannel.Stre
   override fun onAttachedToEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     this.binding = binding
     rtcChannelPlugin.onAttachedToEngine(binding)
-    initPlugin(binding.applicationContext, binding.binaryMessenger, binding.platformViewRegistry)
+//    initPlugin(binding.applicationContext, binding.binaryMessenger, binding.platformViewRegistry)
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
@@ -143,5 +159,24 @@ class AgoraRtcEnginePlugin : FlutterPlugin, MethodCallHandler, EventChannel.Stre
       return@getAssetAbsolutePath
     }
     result.error(IllegalArgumentException::class.simpleName, null, null)
+  }
+
+  override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+    //    initPlugin(binding.applicationContext, binding.binaryMessenger, binding.platformViewRegistry)
+    if (this.binding != null) {
+      initPlugin(binding.activity, binding.activity.applicationContext, this.binding!!.binaryMessenger, this.binding!!.platformViewRegistry)
+    }
+//    else if (this.registrar != null){
+//      initPlugin(binding.activity, binding.activity.applicationContext, this.binding!!.binaryMessenger, this.binding!!.platformViewRegistry)
+//    }
+  }
+
+  override fun onDetachedFromActivityForConfigChanges() {
+  }
+
+  override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+  }
+
+  override fun onDetachedFromActivity() {
   }
 }

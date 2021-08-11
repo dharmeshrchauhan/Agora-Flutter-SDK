@@ -2,6 +2,7 @@ package io.agora.agora_rtc_engine
 
 import ai.deepar.ar.ARErrorType
 import ai.deepar.ar.AREventListener
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.media.Image
@@ -19,12 +20,14 @@ import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
 
 class AgoraSurfaceViewFactory(
+  private val activity: Activity,
   private val messenger: BinaryMessenger,
   private val rtcEnginePlugin: AgoraRtcEnginePlugin,
   private val rtcChannelPlugin: AgoraRtcChannelPlugin
 ) : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
   override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
     return AgoraSurfaceView(
+      activity,
       context.applicationContext,
       messenger,
       viewId,
@@ -36,6 +39,7 @@ class AgoraSurfaceViewFactory(
 }
 
 class AgoraSurfaceView(
+  activity: Activity,
   context: Context,
   messenger: BinaryMessenger,
   viewId: Int,
@@ -43,7 +47,7 @@ class AgoraSurfaceView(
   private val rtcEnginePlugin: AgoraRtcEnginePlugin,
   private val rtcChannelPlugin: AgoraRtcChannelPlugin
 ) : PlatformView, MethodChannel.MethodCallHandler, AREventListener {
-  private val view = DeepArCameraView(context, this, rtcEnginePlugin.engine()!!)
+  private val view = DeepArCameraView(activity, context,this, rtcEnginePlugin.engine()!!)
   private val channel = MethodChannel(messenger, "agora_rtc_engine/surface_view_$viewId")
 
   init {
