@@ -1,37 +1,33 @@
 package io.agora.rtc.base
 
 import ai.deepar.ar.*
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.hardware.Camera
 import android.media.Image
-import android.util.Size
+import android.util.DisplayMetrics
 import android.view.MotionEvent
+import android.view.Surface
 import android.view.SurfaceView
 import android.view.View
 import android.widget.FrameLayout
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
 import com.google.common.util.concurrent.ListenableFuture
 import io.agora.rtc.RtcChannel
 import io.agora.rtc.RtcEngine
 import io.agora.rtc.video.VideoCanvas
 import java.lang.ref.WeakReference
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.util.*
-import android.util.Log
-import ai.deepar.ar.CameraResolutionPreset
-import ai.deepar.ar.DeepAR
 
 
 class DeepArSurfaceView(
-  context: Context
+  context: Context,
+  private val activity: Activity
 ) : FrameLayout(context), AREventListener {
   private var surface: SurfaceView
   private var canvas: VideoCanvas
@@ -48,7 +44,7 @@ class DeepArSurfaceView(
   private val defaultLensFacing = CameraSelector.LENS_FACING_FRONT
   private val lensFacing: Int = defaultLensFacing
   private var cameraGrabber: CameraGrabber? = null
-
+  private var screenOrientation = 0
   private val defaultCameraDevice = Camera.CameraInfo.CAMERA_FACING_FRONT
   private val cameraDevice: Int = defaultCameraDevice
 
@@ -58,8 +54,10 @@ class DeepArSurfaceView(
     } catch (e: UnsatisfiedLinkError) {
       throw RuntimeException("Please init RtcEngine first!")
     }
+
     canvas = VideoCanvas(surface)
     addView(surface)
+
   }
 
   fun setZOrderMediaOverlay(isMediaOverlay: Boolean) {
@@ -193,42 +191,35 @@ class DeepArSurfaceView(
 
   public fun setupCamera() {
     cameraGrabber = CameraGrabber(cameraDevice)
-    //screenOrientation = 0
-//    when (1) {
-//      ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE -> cameraGrabber!!.screenOrientation =
-//        90
-//      ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE -> cameraGrabber!!.screenOrientation =
-//        270
-//      else -> cameraGrabber!!.screenOrientation = 0
-//    }
-
-   // cameraGrabber!!.screenOrientation = 1
+    screenOrientation = 0 //getScreenOrientation()
+    when (screenOrientation) {
+      ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE -> cameraGrabber!!.setScreenOrientation(90)
+      ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE -> cameraGrabber!!.setScreenOrientation(270)
+      else -> cameraGrabber!!.setScreenOrientation(0)
+    }
 
     // Available 1080p, 720p and 480p resolutions
-   // cameraGrabber!!.setResolutionPreset(CameraResolutionPreset.P640x480)
-    Log.d("myTag", "This is my message");
+  //  cameraGrabber!!.setResolutionPreset(CameraResolutionPreset.P1280x720)
+
+    //final Activity context = this;
+
     //final Activity context = this;
     cameraGrabber!!.initCamera(object : CameraGrabberListener {
       override fun onCameraInitialized() {
-        Log.d("myTag", "This is my aawewewewewe");
-        cameraGrabber!!.setFrameReceiver(deepAR!!)
-       // cameraGrabber!!.releaseCamera()
+        cameraGrabber!!.setFrameReceiver(deepAR)
         cameraGrabber!!.startPreview()
       }
 
-      override fun onCameraError(errorMsg: String) {
-        Log.d("myTag", errorMsg);
-//        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-//        builder.setTitle("Camera error")
-//        builder.setMessage(errorMsg)
-//        builder.setCancelable(true)
-//        builder.setPositiveButton("Ok", object : DialogInterface.OnClickListener {
-//          override fun onClick(dialogInterface: DialogInterface, i: Int) {
-//            dialogInterface.cancel()
-//          }
-//        })
-//        val dialog: AlertDialog = builder.create()
-//        dialog.show()
+      override fun onCameraError(errorMsg: String?) {
+        val builder = AlertDialog.Builder(activity)
+        builder.setTitle("Camera error")
+        builder.setMessage(errorMsg)
+        builder.setCancelable(true)
+        builder.setPositiveButton(
+          "Ok"
+        ) { dialogInterface, i -> dialogInterface.cancel() }
+        val dialog = builder.create()
+        dialog.show()
       }
     })
     surface.setOnTouchListener(object : OnTouchListener {
@@ -247,7 +238,7 @@ class DeepArSurfaceView(
         } else {
           // handle single touch events
           if (action == MotionEvent.ACTION_UP) {
-           // handleFocus(event)
+            //handleFocus(event)
           }
         }
         return true
@@ -255,101 +246,35 @@ class DeepArSurfaceView(
     })
   }
 
-  private fun bindImageAnalysis(cameraProvider: ProcessCameraProvider) {
-    val cameraPreset: CameraResolutionPreset = CameraResolutionPreset.P640x480
-    val width: Int
-    val height: Int
-    val orientation: Int =0 // getScreenOrientation()
-    if (orientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE || orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-      width = cameraPreset.getWidth()
-      height = cameraPreset.getHeight()
-    } else {
-      width = cameraPreset.getHeight()
-      height = cameraPreset.getWidth()
-    }
-    buffers = arrayOfNulls(NUMBER_OF_BUFFERS)
-    for (i in 0 until NUMBER_OF_BUFFERS) {
-      buffers[i] = ByteBuffer.allocateDirect(width * height * 3)
-      buffers[i]!!.order(ByteOrder.nativeOrder())
-      buffers[i]!!.position(0)
-    }
-    val imageAnalysis: ImageAnalysis = ImageAnalysis.Builder().setTargetResolution(Size(width, height)).setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
-    imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(context), object : ImageAnalysis.Analyzer {
-      override fun analyze(image: ImageProxy) {
-        //image.getImageInfo().getTimestamp();
-        val byteData: ByteArray
-        val yBuffer: ByteBuffer = image.getPlanes()[0].getBuffer()
-        val uBuffer: ByteBuffer = image.getPlanes()[1].getBuffer()
-        val vBuffer: ByteBuffer = image.getPlanes()[2].getBuffer()
-        val ySize: Int = yBuffer.remaining()
-        val uSize: Int = uBuffer.remaining()
-        val vSize: Int = vBuffer.remaining()
-        byteData = ByteArray(ySize + uSize + vSize)
-
-        //U and V are swapped
-        yBuffer.get(byteData, 0, ySize)
-        vBuffer.get(byteData, ySize, vSize)
-        uBuffer.get(byteData, ySize + vSize, uSize)
-        buffers[currentBuffer]!!.put(byteData)
-        buffers[currentBuffer]!!.position(0)
-        if (deepAR != null) {
-         // ByteBuffer buffer, int width, int height, int orientation, boolean mirror
-         // ByteBuffer buffer, int width, int height, int orientation, boolean mirror, long timestamp
-//          deepAR!!.receiveFrame(
-//            buffers[currentBuffer],
-//            image.width,
-//            image.height,
-//            image.imageInfo.rotationDegrees,
-//            lensFacing == CameraSelector.LENS_FACING_FRONT,
-//            DeepARImageFormat.YUV_420_888,
-//            image.planes[1].pixelStride
-//          )
-        }
-        currentBuffer = (currentBuffer + 1) % NUMBER_OF_BUFFERS
-        image.close()
+  private fun getScreenOrientation(): Int {
+    val rotation: Int = activity.getWindowManager().getDefaultDisplay().getRotation()
+    val dm: DisplayMetrics = DisplayMetrics()
+    activity.getWindowManager().getDefaultDisplay().getMetrics(dm)
+    val width: Int = dm.widthPixels
+    val height: Int = dm.heightPixels
+    val orientation: Int
+    // if the device's natural orientation is portrait:
+    if (((rotation == Surface.ROTATION_0
+        || rotation == Surface.ROTATION_180)) && height > width ||
+      ((rotation == Surface.ROTATION_90
+        || rotation == Surface.ROTATION_270)) && width > height
+    ) {
+      when (rotation) {
+        Surface.ROTATION_0 -> orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        Surface.ROTATION_90 -> orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        Surface.ROTATION_180 -> orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+        Surface.ROTATION_270 -> orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+        else -> orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
       }
-    })
-    val cameraSelector: CameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
-    cameraProvider.unbindAll()
-    cameraProvider.bindToLifecycle((this as LifecycleOwner?)!!, cameraSelector, imageAnalysis)
+    } else {
+      when (rotation) {
+        Surface.ROTATION_0 -> orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        Surface.ROTATION_90 -> orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        Surface.ROTATION_180 -> orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+        Surface.ROTATION_270 -> orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+        else -> orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+      }
+    }
+    return orientation
   }
-
-//  private fun getScreenOrientation(): Int {
-//    val rotation: Int = getWindowManager().getDefaultDisplay().getRotation()
-//    val dm: DisplayMetrics = DisplayMetrics()
-//    getWindowManager().getDefaultDisplay().getMetrics(dm)
-//    val width: Int = dm.widthPixels
-//    val height: Int = dm.heightPixels
-//    val orientation: Int
-//    // if the device's natural orientation is portrait:
-//    if (((rotation == Surface.ROTATION_0
-//        || rotation == Surface.ROTATION_180)) && height > width ||
-//      ((rotation == Surface.ROTATION_90
-//        || rotation == Surface.ROTATION_270)) && width > height) {
-//      when (rotation) {
-//        Surface.ROTATION_0 -> orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-//        Surface.ROTATION_90 -> orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-//        Surface.ROTATION_180 -> orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
-//        Surface.ROTATION_270 -> orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-//        else -> {
-//          Log.e(MainActivity.TAG, "Unknown screen orientation. Defaulting to " +
-//            "portrait.")
-//          orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-//        }
-//      }
-//    } else {
-//      when (rotation) {
-//        Surface.ROTATION_0 -> orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-//        Surface.ROTATION_90 -> orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-//        Surface.ROTATION_180 -> orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-//        Surface.ROTATION_270 -> orientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
-//        else -> {
-//          Log.e(MainActivity.TAG, "Unknown screen orientation. Defaulting to " +
-//            "landscape.")
-//          orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-//        }
-//      }
-//    }
-//    return orientation
-//  }
 }

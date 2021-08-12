@@ -1,5 +1,6 @@
 package io.agora.agora_rtc_engine
 
+import android.app.Activity
 import android.content.Context
 import android.view.View
 import io.agora.rtc.RtcChannel
@@ -14,6 +15,7 @@ import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
 
 class AgoraSurfaceViewFactory(
+  private val activity: Activity,
   private val messenger: BinaryMessenger,
   private val rtcEnginePlugin: AgoraRtcEnginePlugin,
   private val rtcChannelPlugin: AgoraRtcChannelPlugin
@@ -21,6 +23,7 @@ class AgoraSurfaceViewFactory(
   override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
     return AgoraSurfaceView(
       context.applicationContext,
+      activity,
       messenger,
       viewId,
       args as? Map<*, *>,
@@ -32,13 +35,14 @@ class AgoraSurfaceViewFactory(
 
 class AgoraSurfaceView(
   context: Context,
+  activity: Activity,
   messenger: BinaryMessenger,
   viewId: Int,
   args: Map<*, *>?,
   private val rtcEnginePlugin: AgoraRtcEnginePlugin,
   private val rtcChannelPlugin: AgoraRtcChannelPlugin
 ) : PlatformView, MethodChannel.MethodCallHandler {
-  private val view = DeepArSurfaceView(context)
+  private val view = DeepArSurfaceView(context,activity)
   private val channel = MethodChannel(messenger, "agora_rtc_engine/surface_view_$viewId")
 
   init {
