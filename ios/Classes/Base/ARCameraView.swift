@@ -17,9 +17,9 @@ extension String {
 }
 
 enum Masks: String, CaseIterable {
-    case none
     case beauty_without_deform
     case beauty_without_eyelashes
+    case none
 }
 
 class ARCameraView: UIView {
