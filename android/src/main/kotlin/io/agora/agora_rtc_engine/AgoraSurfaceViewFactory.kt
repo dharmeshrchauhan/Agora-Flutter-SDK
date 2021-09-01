@@ -1,11 +1,14 @@
 package io.agora.agora_rtc_engine
 
+import ai.deepar.ar.DeepAR
 import android.app.Activity
 import android.content.Context
+import android.opengl.GLSurfaceView
 import android.view.View
 import io.agora.rtc.RtcChannel
 import io.agora.rtc.RtcEngine
 import io.agora.rtc.base.DeepArSurfaceView
+import io.agora.rtc.base.DeepARRenderer
 import io.agora.rtc.video.VideoEncoderConfiguration
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
@@ -57,6 +60,7 @@ class AgoraSurfaceView(
     channel.setMethodCallHandler(this)
 
     rtcEnginePlugin.engine()!!.setExternalVideoSource(true, true, true)
+    //rtcEnginePlugin.engine()!!.pushExternalVideoFrame(true, true, true)
 
     // Please go to this page for detailed explanation
     // https://docs.agora.io/en/Video/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_rtc_engine.html#af5f4de754e2c1f493096641c5c5c1d8f
@@ -67,8 +71,8 @@ class AgoraSurfaceView(
       VideoEncoderConfiguration.STANDARD_BITRATE,
       VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_FIXED_PORTRAIT))
 
-    view.initializeDeepAR()
-    view.setupCamera()
+
+    view.setup(rtcEnginePlugin.engine())
 
   }
 

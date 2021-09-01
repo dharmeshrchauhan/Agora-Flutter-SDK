@@ -8,8 +8,8 @@ import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.hardware.Camera
 import android.media.Image
+import android.opengl.GLSurfaceView
 import android.util.DisplayMetrics
-import android.view.MotionEvent
 import android.view.Surface
 import android.view.SurfaceView
 import android.view.View
@@ -17,6 +17,7 @@ import android.widget.FrameLayout
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import com.google.common.util.concurrent.ListenableFuture
+import io.agora.agora_rtc_engine.R.*
 import io.agora.rtc.RtcChannel
 import io.agora.rtc.RtcEngine
 import io.agora.rtc.video.VideoCanvas
@@ -33,7 +34,7 @@ class DeepArSurfaceView(
   private var canvas: VideoCanvas
   private var isMediaOverlay = false
   private var onTop = false
-  private var deepAR: DeepAR? = null
+  public var deepAR: DeepAR? = null
   private var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>? = null
   private var channel: WeakReference<RtcChannel>? = null
   private val currentMask = 0
@@ -47,16 +48,25 @@ class DeepArSurfaceView(
   private var screenOrientation = 0
   private val defaultCameraDevice = Camera.CameraInfo.CAMERA_FACING_FRONT
   private val cameraDevice: Int = defaultCameraDevice
+  private var view: View? = null
+  public var renderer: DeepARRenderer? = null
+  public var newSurfaceView: GLSurfaceView? = null
 
   init {
     try {
       surface = RtcEngine.CreateRendererView(context)
+    //  view = activity.getLayoutInflater().inflate(layout.activity_main, null)
+    //  activity.setContentView(layout.activity_main)
+     // surface = view!!.findViewById(io.agora.agora_rtc_engine.R.id.surface_view_new) as SurfaceView
+
+      canvas = VideoCanvas(newSurfaceView!!)
+      //addView(newSurfaceView!!)
+
     } catch (e: UnsatisfiedLinkError) {
       throw RuntimeException("Please init RtcEngine first!")
     }
 
-    canvas = VideoCanvas(surface)
-    addView(surface)
+
 
   }
 
@@ -104,6 +114,36 @@ class DeepArSurfaceView(
     initializeFilters()
   }
 
+  public fun setup(mRtcEngine: RtcEngine? = null){
+    setupCamera()
+    initializeFilters()
+
+    newSurfaceView = GLSurfaceView(context)
+    newSurfaceView!!.setEGLContextClientVersion(2)
+    newSurfaceView!!.setEGLConfigChooser(8, 8, 8, 8, 16, 0)
+    renderer = DeepARRenderer(deepAR, mRtcEngine)
+
+    newSurfaceView!!.setEGLContextFactory(DeepARRenderer.MyContextFactory(renderer))
+
+    newSurfaceView!!.setRenderer(renderer)
+    newSurfaceView!!.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
+
+
+    canvas = VideoCanvas(newSurfaceView!!)
+    addView(newSurfaceView!!)
+
+    //val local = view!!.findViewById<FrameLayout>(io.agora.agora_rtc_engine.R.id.localPreview)
+   // local.addView(newSurfaceView)
+
+   // mRtcEngine.setLocalVideoRenderer(renderer)
+
+  //  view!!.findViewById(io.agora.agora_rtc_engine.R.id.surface_view_new)
+   // val local = view!!.findViewById(io.agora.agora_rtc_engine.R.id.localPreview)
+  //  local.addView(surfaceView)
+
+
+
+  }
   private fun initializeFilters() {
     masks = ArrayList()
     masks!!.add("none")
@@ -127,7 +167,7 @@ class DeepArSurfaceView(
     this.channel = if (channel != null) WeakReference(channel) else null
     canvas.channelId = this.channel?.get()?.channelId()
     canvas.uid = uid.toNativeUInt()
-    setupVideoCanvas(engine)
+    //setupVideoCanvas(engine)
   }
 
   fun resetVideoCanvas(engine: RtcEngine) {
@@ -142,7 +182,7 @@ class DeepArSurfaceView(
 
   private fun setupVideoCanvas(engine: RtcEngine) {
     removeAllViews()
-    surface = RtcEngine.CreateRendererView(context.applicationContext)
+   // surface = RtcEngine.CreateRendererView(context.applicationContext)
     surface.setZOrderMediaOverlay(isMediaOverlay)
     surface.setZOrderOnTop(onTop)
     addView(surface)
@@ -189,9 +229,9 @@ class DeepArSurfaceView(
     super.onMeasure(widthMeasureSpec, heightMeasureSpec)
   }
 
-  public fun setupCamera() {
+  private fun setupCamera() {
     cameraGrabber = CameraGrabber(cameraDevice)
-    screenOrientation = 0 //getScreenOrientation()
+    screenOrientation = getScreenOrientation()
     when (screenOrientation) {
       ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE -> cameraGrabber!!.setScreenOrientation(90)
       ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE -> cameraGrabber!!.setScreenOrientation(270)
@@ -222,29 +262,10 @@ class DeepArSurfaceView(
         dialog.show()
       }
     })
-    surface.setOnTouchListener(object : OnTouchListener {
-      override fun onTouch(v: View, event: MotionEvent): Boolean {
-        // Get the pointer ID
-        val params: Camera.Parameters = cameraGrabber!!.getCamera().getParameters()
-        val action: Int = event.getAction()
-        if (event.getPointerCount() > 1) {
-          // handle multi-touch events
-//                    if (action == MotionEvent.ACTION_POINTER_DOWN) {
-//                        mDist = getFingerSpacing(event);
-//                    } else if (action == MotionEvent.ACTION_MOVE && params.isZoomSupported()) {
-//                        cameraGrabber.getCamera().cancelAutoFocus();
-//                        handleZoom(event, params);
-//                    }
-        } else {
-          // handle single touch events
-          if (action == MotionEvent.ACTION_UP) {
-            //handleFocus(event)
-          }
-        }
-        return true
-      }
-    })
-  }
+
+
+
+    }
 
   private fun getScreenOrientation(): Int {
     val rotation: Int = activity.getWindowManager().getDefaultDisplay().getRotation()

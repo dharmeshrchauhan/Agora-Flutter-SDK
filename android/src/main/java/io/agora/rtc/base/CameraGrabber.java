@@ -185,6 +185,8 @@ public class CameraGrabber
         }
 
         synchronized void setFrameReceiver(DeepAR receiver, final int cameraDevice) {
+
+
             frameReceiver = receiver;
             mHandler.post(new Runnable() {
                 @Override
