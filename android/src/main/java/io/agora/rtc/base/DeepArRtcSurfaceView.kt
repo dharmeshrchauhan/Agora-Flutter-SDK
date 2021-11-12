@@ -57,7 +57,7 @@ class DeepArRtcSurfaceView(
 
     Handler().postDelayed({
       setupCamera();
-    }, 2000)
+    }, 5000)
 
     surface = GLSurfaceView(context)
     surface.setEGLContextClientVersion(2)
@@ -79,12 +79,12 @@ class DeepArRtcSurfaceView(
 //    }
 //    surface.setBackgroundColor(Color.LTGRAY)
 //   // canvas = VideoCanvas(surface)
-//    addView(surface)
+    addView(surface)
   }
 
 
   private fun setupCamera() {
-    cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+    cameraProviderFuture = ProcessCameraProvider.getInstance(newActivity)
     cameraProviderFuture!!.addListener(Runnable {
       try {
         val cameraProvider = cameraProviderFuture!!.get()
@@ -95,7 +95,7 @@ class DeepArRtcSurfaceView(
       } catch (e: InterruptedException) {
         e.printStackTrace()
       }
-    }, ContextCompat.getMainExecutor(context))
+    }, ContextCompat.getMainExecutor(newActivity))
   }
 
   private fun bindImageAnalysis(cameraProvider: ProcessCameraProvider) {
@@ -118,7 +118,7 @@ class DeepArRtcSurfaceView(
     }
     val imageAnalysis = ImageAnalysis.Builder().setTargetResolution(Size(width, height))
       .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
-    imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(context),
+    imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(newActivity),
       ImageAnalysis.Analyzer { image -> //image.getImageInfo().getTimestamp();
         val byteData: ByteArray
         val yBuffer = image.planes[0].buffer
@@ -302,11 +302,11 @@ class DeepArRtcSurfaceView(
   }
 
   override fun shutdownFinished() {
-    TODO("Not yet implemented")
+    //TODO("Not yet implemented")
   }
 
   override fun initialized() {
-    TODO("Not yet implemented")
+    //TODO("Not yet implemented")
   }
 
   override fun faceVisibilityChanged(p0: Boolean) {
